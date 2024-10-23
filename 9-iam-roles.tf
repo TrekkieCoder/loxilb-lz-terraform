@@ -43,6 +43,13 @@ output "eks_loxilb_arn" {
   value = aws_iam_role.eks_loxilb.arn
 }
 
+/*
+provider "kubernetes" {
+  host                   = aws_eks_cluster.demo.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.demo.certificate_authority[0].data)
+  token                  = aws_eks_cluster.token
+}
+
 resource "kubernetes_service_account" "loxilb" {
   metadata {
     name      = "loxilb"
@@ -95,3 +102,4 @@ module "eks" {
     },
   ]
 }
+*/
