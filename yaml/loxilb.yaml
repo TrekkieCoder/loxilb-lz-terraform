@@ -24,7 +24,7 @@ spec:
           - sh
           - -ec
           - |
-            /usr/local/sbin/mkllb-url -a ${MY_POD_IP} -z llb -t hostcidr -c aws && \
+            /usr/local/sbin/mkllb-url -a 0.0.0.0 -z llb -t hostcidr -c aws && \
             echo "Init Container Done";
         image: "ghcr.io/loxilb-io/loxilb:latest"
         imagePullPolicy: Always
@@ -32,11 +32,6 @@ spec:
           - name: kubeconfig-vol
             mountPath: /root/.kube/config
             subPath: kubeconfig
-        env:
-        - name: MY_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
       containers:
       - name: loxilb-app
         image: "ghcr.io/loxilb-io/loxilb:latest"
