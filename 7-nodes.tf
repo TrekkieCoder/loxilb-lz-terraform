@@ -36,18 +36,19 @@ resource "aws_iam_role_policy_attachment" "nodes-AmazonEC2ContainerRegistryReadO
 
 # aws node group 
 
-resource "aws_eks_node_group" "private-nodes" {
+resource "aws_eks_node_group" "worker-nodes" {
   cluster_name    = aws_eks_cluster.demo.name
-  node_group_name = "private-nodes"
+  node_group_name = "worker-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
 
   subnet_ids = [
+    aws_subnet.public-us-east-2a.id,
     aws_subnet.private-us-east-2a.id,
     aws_subnet.private-us-east-2b.id
   ]
 
   capacity_type  = "ON_DEMAND"
-  instance_types = ["t2.medium"]
+  instance_types = ["t2.large"]
 
   scaling_config {
     desired_size = 1
