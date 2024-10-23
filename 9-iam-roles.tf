@@ -22,7 +22,7 @@ resource "aws_iam_role" "eks_loxilb" {
 }
 
 resource "aws_iam_policy" "eks_loxilb" {
-  name = "eks-cluster-autoscaler"
+  name = "eks-cluster-loxilb"
 
   policy = jsonencode({
     Statement = [{
