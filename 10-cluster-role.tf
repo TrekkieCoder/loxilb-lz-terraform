@@ -10,22 +10,18 @@ locals {
     EOF
 }
 
-#provider "aws" {
-#  region = var.region
-#}
-
-data "aws_eks_cluster" "this" {
+data "aws_eks_cluster_auth" "demo" {
   name = "demo"
-}
 
-data "aws_eks_cluster_auth" "this" {
-  name = "demo"
+  depends_on = [
+    aws_eks_cluster.demo,
+  ]
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.this.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.this.token
+  host                   = aws_eks_cluster.demo.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.demo.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.demo.token
 }
 
 resource "kubernetes_service_account" "loxilb" {
@@ -71,6 +67,10 @@ data "kubernetes_config_map" "aws_auth" {
     name = "aws-auth"
     namespace = "kube-system"
   }
+
+ depends_on = [
+    aws_eks_cluster.demo,
+ ]
 }
 
 resource "kubernetes_config_map_v1_data" "aws_auth" {
@@ -92,4 +92,8 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
     ignore_changes = []
     //prevent_destroy = true
   }
+
+  depends_on = [
+    aws_eks_cluster.demo,
+  ]
 }

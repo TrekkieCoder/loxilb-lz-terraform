@@ -49,3 +49,10 @@ resource "aws_eks_cluster" "demo" {
   depends_on = [aws_iam_role_policy_attachment.demo-AmazonEKSClusterPolicy]
 }
 
+output "eks_endpoint" {
+  value = aws_eks_cluster.demo.endpoint
+}
+
+output "eks_ca_cert" {
+  value = aws_eks_cluster.demo.certificate_authority[0].data
+}
