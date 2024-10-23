@@ -73,6 +73,16 @@ data "kubernetes_config_map" "aws_auth" {
  ]
 }
 
+resource "null_resource" "wait_cluster" {
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
+
+  depends_on = [
+    aws_eks_cluster.demo
+  ]
+}
+
 resource "kubernetes_config_map_v1_data" "aws_auth" {
   force = true
 
@@ -94,7 +104,7 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
   }
 
   depends_on = [
-    aws_eks_cluster.demo,
+    null_resource.wait_cluster
   ]
 }
 
