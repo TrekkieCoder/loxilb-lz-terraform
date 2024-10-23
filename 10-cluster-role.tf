@@ -97,3 +97,21 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
     aws_eks_cluster.demo,
   ]
 }
+
+resource "null_resource" "kubeconfig" {
+  provisioner "local-exec" {
+    command = "aws eks update-kubeconfig --region us-east-1 --name ${aws_eks_cluster.demo.name}"
+  }
+
+  provisioner "local-exec" {
+    command = "aws eks update-kubeconfig --region us-east-1 --name ${aws_eks_cluster.demo.name} --kubeconfig kubeconfig"
+  }
+
+  provisioner "local-exec" {
+    command = "kubectl create configmap kubeconfig --from-file=kubeconfig -n kube-system"
+  }
+
+  depends_on = [
+    aws_eks_cluster.demo
+  ]
+}
