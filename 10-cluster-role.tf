@@ -75,11 +75,12 @@ data "kubernetes_config_map" "aws_auth" {
 
 resource "null_resource" "wait_cluster" {
   provisioner "local-exec" {
-    command = "sleep 30"
+    command = "sleep 120"
   }
 
   depends_on = [
-    aws_eks_cluster.demo
+    aws_eks_cluster.demo,
+    aws_eks_node_group.lz-worker-nodes
   ]
 }
 
