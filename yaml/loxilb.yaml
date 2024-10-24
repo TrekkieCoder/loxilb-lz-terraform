@@ -45,10 +45,20 @@ spec:
           capabilities:
             add:
               - SYS_ADMIN
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - sh
+                - -ec
+                - |
+                  /usr/local/sbin/mkllb-url -a 0.0.0.0 -z llb -t hostcidr -c aws -x && \
+                  echo "Stop hook done";
         volumeMounts:
           - name: kubeconfig-vol
             mountPath: /root/.kube/config
             subPath: kubeconfig
+      terminationGracePeriodSeconds: 90
       volumes:
       - name: kubeconfig-vol
         configMap:
