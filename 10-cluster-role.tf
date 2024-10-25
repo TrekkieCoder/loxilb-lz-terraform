@@ -1,7 +1,6 @@
 # Configure the AWS Provider
-
 locals {
-  eks_loxilb_arn = "arn:aws:iam::829322364554:role/eks-loxilb"
+  eks_loxilb_demo_arn = "arn:aws:iam::829322364554:role/eks-loxilb"
   new_role_yaml = <<-EOF
     - groups:
       - system:masters
@@ -12,16 +11,6 @@ locals {
 
 data "aws_eks_cluster_auth" "demo" {
   name = "demo"
-
-  depends_on = [
-    aws_eks_cluster.demo,
-  ]
-}
-
-provider "kubernetes" {
-  host                   = aws_eks_cluster.demo.endpoint
-  cluster_ca_certificate = base64decode(aws_eks_cluster.demo.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.demo.token
 }
 
 resource "kubernetes_service_account" "loxilb" {
@@ -29,7 +18,7 @@ resource "kubernetes_service_account" "loxilb" {
     name      = "loxilb"
     namespace = "kube-system"
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.eks_loxilb.arn
+      "eks.amazonaws.com/role-arn" = local.eks_loxilb_demo_arn
     }
   }
 }
@@ -69,20 +58,21 @@ data "kubernetes_config_map" "aws_auth" {
   }
 
  depends_on = [
-    aws_eks_cluster.demo,
+    #aws_eks_cluster.demo,
  ]
 }
 
 resource "null_resource" "wait_cluster" {
   provisioner "local-exec" {
-    command = "sleep 120"
+    command = "sleep 20"
   }
 
   depends_on = [
-    aws_eks_cluster.demo,
-    aws_eks_node_group.lz-worker-nodes
+    #module.eks_blueprints.module.aws_eks.aws_eks_cluster.this[0]
+    #aws_eks_node_group.lz-worker-nodes
   ]
 }
+
 
 resource "kubernetes_config_map_v1_data" "aws_auth" {
   force = true
@@ -105,17 +95,17 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
   }
 
   depends_on = [
-    null_resource.wait_cluster
+    null_resource.wait_cluster,
   ]
 }
 
-resource "null_resource" "kubeconfig" {
-  provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --region us-east-1 --name ${aws_eks_cluster.demo.name}"
-  }
+resource "null_resource" "post-kubeconfig" {
+  #provisioner "local-exec" {
+  #  command = "aws eks update-kubeconfig --region us-east-1 --name ${module.eks_blueprints.eks_cluster_name}"
+  #}
 
   provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --region us-east-1 --name ${aws_eks_cluster.demo.name} --kubeconfig kubeconfig"
+    command = "aws eks update-kubeconfig --region us-east-1 --name demo1 --kubeconfig kubeconfig"
   }
 
   provisioner "local-exec" {
@@ -123,6 +113,6 @@ resource "null_resource" "kubeconfig" {
   }
 
   depends_on = [
-    aws_eks_cluster.demo
+    module.eks_blueprints
   ]
 }

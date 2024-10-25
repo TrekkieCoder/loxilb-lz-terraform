@@ -2,7 +2,7 @@
 # role for nodegroup
 
 resource "aws_iam_role" "nodes" {
-  name = "eks-node-group-nodes"
+  name = "eks-node-group-nodes1"
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -36,6 +36,7 @@ resource "aws_iam_role_policy_attachment" "nodes-AmazonEC2ContainerRegistryReadO
 
 # aws node group 
 
+/*
 resource "aws_eks_node_group" "worker-nodes" {
   cluster_name    = aws_eks_cluster.demo.name
   node_group_name = "worker-nodes"
@@ -177,6 +178,7 @@ resource "aws_eks_node_group" "lz-worker-nodes" {
     aws_iam_role_policy_attachment.nodes-AmazonEC2ContainerRegistryReadOnly,
   ]
 }
+*/
 
 # launch template if required
 
@@ -194,3 +196,69 @@ resource "aws_eks_node_group" "lz-worker-nodes" {
 #     }
 #   }
 # }
+
+/*
+locals {
+  loxilb-ng-yaml = <<-EOF
+    apiVersion: eksctl.io/v1alpha5
+    kind: ClusterConfig
+
+    metadata:
+      name: ${aws_eks_cluster.demo.name}
+      region: us-east-1
+
+    vpc:
+		  id: ${aws_vpc.k8svpc.id}
+		  securityGroup: ${aws_vpc.k8svpc.default_security_group_id}
+	  	subnets:
+    		private:
+		      private1:
+    	      id: ${aws_subnet.private-us-east-1a.id}
+      		private2:
+          	id: ${aws_subnet.private-us-east-1b.id}
+					private3:
+						id: ${aws_subnet.private-us-east-1-atl-2a.id}
+		    public:
+    		  public1:
+    	      id: ${aws_subnet.public-us-east-1a.id}
+      		public2:
+          	id: ${aws_subnet.public-us-east-1b.id}
+					public3:
+						id: ${aws_subnet.public-us-east-1-atl-2a.id}
+
+    localZones: ["us-east-1-atl-2a"]
+
+    nodeGroups:
+      - name: loxilb-lz
+        instanceType: c6i.large
+        subnets: #public subnet
+        - ${aws_subnet.public-us-east-1-atl-2a.id}
+    EOF
+}
+
+resource "null_resource" "loxilb-mk-ng-yaml" {
+  provisioner "local-exec" {
+    command = <<EOF
+     echo "${local.loxilb-ng-yaml}" > yaml/loxilb-ng.yaml
+EOF
+  }
+
+  depends_on = [
+    aws_eks_cluster.demo,
+    aws_eks_node_group.worker-nodes,
+  ]
+}
+
+resource "null_resource" "loxilb-mk-ng" {
+  provisioner "local-exec" {
+    command = "eksctl create nodegroup --config-file=yaml/loxilb-ng.yaml"
+  }
+
+  depends_on = [
+    null_resource.loxilb-mk-ng-yaml,
+	  aws_iam_role_policy_attachment.nodes-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.nodes-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.nodes-AmazonEC2ContainerRegistryReadOnly
+  ]
+}
+*/
