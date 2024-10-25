@@ -1,9 +1,13 @@
 # IAM role for eks
 
+locals {
+	cluster-iam-role-name = "eks-cluster-loxilb-demo"
+}
+
 resource "aws_iam_role" "demo" {
-  name = "eks-cluster-demo"
+  name = "${local.cluster-iam-role-name}"
   tags = {
-    tag-key = "eks-cluster-demo"
+    tag-key = "${local.cluster-iam-role-name}"
   }
 
   assume_role_policy = <<POLICY

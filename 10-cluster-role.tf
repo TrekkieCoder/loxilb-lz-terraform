@@ -1,11 +1,11 @@
 # Configure the AWS Provider
 
 locals {
-  eks_loxilb_arn = "arn:aws:iam::829322364554:role/eks-loxilb"
+  eks_loxilb_arn = "${aws_iam_role.eks_loxilb.arn}"
   new_role_yaml = <<-EOF
     - groups:
       - system:masters
-      rolearn: "arn:aws:iam::829322364554:role/eks-loxilb"
+      rolearn: "${aws_iam_role.eks_loxilb.arn}"
       username: loxilb
     EOF
 }
@@ -80,7 +80,8 @@ resource "null_resource" "wait_cluster" {
 
   depends_on = [
     aws_eks_cluster.demo,
-    aws_eks_node_group.lz-worker-nodes
+    aws_eks_node_group.lz-worker-nodes,
+    aws_eks_node_group.worker-nodes
   ]
 }
 
@@ -109,7 +110,12 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
   ]
 }
 
+
 resource "null_resource" "kubeconfig" {
+  provisioner "local-exec" {
+    command = "rm -f kubeconfig"
+  }
+
   provisioner "local-exec" {
     command = "aws eks update-kubeconfig --region us-east-1 --name ${aws_eks_cluster.demo.name}"
   }

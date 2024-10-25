@@ -1,3 +1,7 @@
+locals {
+	iam_role_name = "eks-loxilb-demo"
+}
+
 data "aws_iam_policy_document" "eks_loxilb_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -18,11 +22,11 @@ data "aws_iam_policy_document" "eks_loxilb_assume_role_policy" {
 
 resource "aws_iam_role" "eks_loxilb" {
   assume_role_policy = data.aws_iam_policy_document.eks_loxilb_assume_role_policy.json
-  name               = "eks-loxilb"
+  name               = "${local.iam_role_name}"
 }
 
 resource "aws_iam_policy" "eks_loxilb" {
-  name = "eks-cluster-loxilb"
+  name = "eks-cluster-demo-policy"
 
   policy = jsonencode({
     Statement = [{

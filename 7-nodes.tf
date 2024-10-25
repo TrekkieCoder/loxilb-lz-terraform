@@ -1,8 +1,12 @@
 
 # role for nodegroup
 
+locals {
+  ng-iam-role-name = "eks-ng--demo"
+}
+
 resource "aws_iam_role" "nodes" {
-  name = "eks-node-group-nodes"
+  name = "${local.ng-iam-role-name}"
 
   assume_role_policy = jsonencode({
     Statement = [{
