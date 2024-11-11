@@ -29,6 +29,7 @@ jobs:
       - name: Perform any pre-requisite operations
         run: | 
              sudo mkdir -p /opt/loxilb/
+             sudo apt-get purge libssl-dev | true
       - name: Build loxilb deb package
         run: |
              git clone https://github.com/loxilb-io/tools.git && cd tools/pkg/ && make major=${{ github.event.inputs.tagName }} && cd -
