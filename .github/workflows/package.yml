@@ -31,7 +31,7 @@ jobs:
              sudo mkdir -p /opt/loxilb/
              wget https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz && tar -xvzf openssl-3.3.1.tar.gz && \
              cd openssl-3.3.1 && ./Configure enable-ktls '-Wl,-rpath,$(LIBRPATH)' --prefix=/usr/local/ssl/ && \
-             make -j$(nproc) && make install && cd - && \
+             make -j$(nproc) && sudo make install && cd - && \
              touch openssl-3.0.conf && echo "/usr/local/ssl/lib" >> openssl-3.0.conf && sudo mv openssl-3.0.conf /etc/ld.so.conf.d/openssl-3.0.conf && sudo ldconfig \
              sudo rm -fr openssl-3.3.1*
       - name: Build loxilb deb package
