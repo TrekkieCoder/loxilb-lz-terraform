@@ -1,0 +1,36 @@
+
+name: OSBuildReleases
+
+on: 
+  workflow_dispatch:
+     inputs:
+      tagName:
+        description: 'Tag Name'     
+        required: true
+        default: 'latest'
+
+jobs:
+  build:
+    name: Build OS packages
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v2
+      - uses: actions/setup-go@v3
+        with:
+             go-version: '>=1.18.0'
+      - name: Install Dependencies
+        run: sudo apt-get update  && sudo apt-get -y install clang-10 llvm libelf-dev gcc-multilib libpcap-dev elfutils dwarves git linux-tools-$(uname -r) libbsd-dev bridge-utils unzip build-essential bison flex iproute2
+      - name: Build loxilb deb package
+        run: |
+             git clone https://github.com/loxilb-io/tools.git && cd tools/pkg/ && make major=${{ github.event.inputs.tagName }} && cd -
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.tagName }}
+          allowUpdates: true
+          artifacts: "tools/pkg/*.deb"
