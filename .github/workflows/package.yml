@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
      inputs:
       tagName:
-        description: 'Tag Name'     
+        description: 'Tag Name (e.g 0.9.7 or latest)'     
         required: true
         default: 'latest'
 
@@ -35,6 +35,6 @@ jobs:
              git clone https://github.com/loxilb-io/tools.git && cd tools/pkg/ && make major=${{ github.event.inputs.tagName }} && cd -
       - uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.event.inputs.tagName }}
+          tag: v${{ github.event.inputs.tagName }}
           allowUpdates: true
           artifacts: "tools/pkg/*.deb"
